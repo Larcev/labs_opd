@@ -1,73 +1,59 @@
-import requests
-from bs4 import BeautifulSoup
-from time import sleep
-import random
+import os
+import asyncio
 
-# Настройки
-USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-]
+from aiogram import Bot, Dispatcher, F
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from aiogram.filters import CommandStart, Command, CommandObject
+from dotenv import load_dotenv
+from handlers import router
+dp = Dispatcher()
 
+'''@dp.message(CommandStart(deep_link=True))
+async def cmd_start(message: Message, command: CommandObject):
+    if command.args.isdigit():
+        if command.args == '242':
+            await message.answer(f'Привет! Ты пришел от Рустама')
+    else:
+        await message.answer('Ошибка')
+'''
 
-def get_random_headers():
-    return {
-        'User-Agent': random.choice(USER_AGENTS),
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
-    }
+'''@dp.message(Command('help'))
+async def cmd_help(message: Message):
+    await message.answer('Пока что бот ничего не умеет')
+    '''
 
+#отправить фото обратно в первоначальном качестве
 
-def parse_pikabu(page_count=1):
-    base_url = "https://pikabu.ru/hot"
-    results = []
-
-    for page in range(1, page_count + 1):
-        try:
-            url = f"{base_url}?page={page}" if page > 1 else base_url
-            print(f"Парсинг страницы {url}")
-
-            response = requests.get(url, headers=get_random_headers(), timeout=10)
-            response.raise_for_status()
-
-            soup = BeautifulSoup(response.text, 'html.parser')
-            articles = soup.find_all('article', class_='story')
-
-            for article in articles:
-                try:
-                    title = article.find('h2', class_='story__title').text.strip()
-                    link = "https://pikabu.ru" + article.find('a', class_='story__title-link')['href']
-                    rating = article.find('div', class_='story__rating-count').text.strip()
-                    comments = article.find('span', class_='story__comments-link-count').text.strip()
-                    author = article.find('a', class_='user__nick').text.strip()
-
-                    results.append({
-                        'title': title,
-                        'link': link,
-                        'rating': rating,
-                        'comments': comments,
-                        'author': author
-                    })
-                except Exception as e:
-                    print(f"Ошибка парсинга статьи: {e}")
-                    continue
-
-            sleep(random.uniform(1.5, 3.0))
-
-        except Exception as e:
-            print(f"Ошибка при обработке страницы {page}: {e}")
-            break
-
-    return results
+'''
+@dp.message(Command('id'))
+async def cmd_help(message: Message):
+    await message.answer(f'{message.from_user.first_name}, вам нужна помощь?')
+    await message.answer(f'Ваш ID: {message.from_user.id}')
+команда id, выдает id пользователя
+'''
 
 
-if __name__ == "__main__":
-    parsed_data = parse_pikabu(page_count=2)  # Парсим 2 страницы
+async def main():
+    load_dotenv()
+    bot = Bot(token=os.getenv('TG_TOKEN'))  #для дальнейшей разработки в будущем надо делать именно так
+    dp = Dispatcher()
+    dp.startup.register(startup)
+    dp.shutdown.register(shutdown)
+    dp.include_router(router)
 
-    print("\nРезультаты парсинга:")
-    for i, item in enumerate(parsed_data, 1):
-        print(f"\n{i}. {item['title']}")
-        print(f"   Автор: {item['author']}")
-        print(f"   Рейтинг: {item['rating']}")
-        print(f"   Комментарии: {item['comments']}")
-        print(f"   Ссылка: {item['link']}")
+    await dp.start_polling(bot)
+
+
+#чтобы красиво было
+async def startup(dispatcher: Dispatcher):
+    print('starting up...')
+
+async def shutdown(dispatcher: Dispatcher):
+    print('Shutting down...')
+
+# это нужно, чтобы при остановке бота не возникало ошибок на windows
+if __name__ == '__main__':
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        pass
