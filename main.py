@@ -32,7 +32,7 @@ async def cmd_help(message: Message):
 команда id, выдает id пользователя
 '''
 
-
+# код ниже можешь добавлять в каждый проект
 async def main():
     load_dotenv()
     bot = Bot(token=os.getenv('TG_TOKEN'))  #для дальнейшей разработки в будущем надо делать именно так
