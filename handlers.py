@@ -7,7 +7,7 @@ router = Router()
 user_data = {}  # user_id: {'stage': str, 'amount': int, 'term': int, 'percent': float}
 # - НУЖНО ЧТОБЫ БОЛЬШЕ ОДНОЙ СЕССИИ ЗА РАЗ
 
-
+#нажимаешь на кнопку, выдает сообщение от того, что ты выбрал
 @router.message(CommandStart())
 async def cmd_start(message: Message):
     await message.answer('Добро пожаловать! Выберите режим погашения:', reply_markup=kb.main_kb)
@@ -26,7 +26,8 @@ async def handle_wealth(message: Message):
 async def handle_fast_start(message: Message):
     user_data[message.from_user.id] = {"stage": "fast_amount"}
     await message.answer("Введите сумму кредита:")
-
+#если что-то пошло не так, попросит нажать кнопку start или выбрать режим, но таких случаев не замечено
+#каждый кб связан с айди юзера, поэтому если этого айди не будет в переменной, код не запустится
 @router.message()
 async def handle_fast_flow(message: Message):
     user_id = message.from_user.id
@@ -39,13 +40,15 @@ async def handle_fast_flow(message: Message):
 
     # Отладка: логируем этап
     print(f"User {user_id}, Stage: {stage}, Input: {message.text}")
+    # тут для отслеживания пути пользователя, это для себя, отслеживать на каком этапе происходят ошибки
 
     # Обработка обычного погашения
-    if stage.startswith("normal"):
-        if stage == "normal_amount":
-            if message.text.isdigit():
-                data["amount"] = int(message.text)
-                data["stage"] = "normal_term"
+    if stage.startswith("normal"): # если начинается с normal, то можно идти дальше, в этом коде не нужно
+        #но если улучшать обычное погашение, добавлять ответвления, то нужно
+        if stage == "normal_amount": 
+            if message.text.isdigit(): #если число
+                data["amount"] = int(message.text) 
+                data["stage"] = "normal_term" 
                 await message.answer("Введите срок кредита в месяцах:")
             else:
                 await message.answer("Введите сумму числом.")
