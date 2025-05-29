@@ -14,7 +14,7 @@ main = ReplyKeyboardMarkup(keyboard=[
     input_field_placholder='Выберите пункт ниже'
 )
 '''
-
+#тут кнопки, какие есть
 main_kb = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="📉 Досрочное погашение")],
@@ -32,7 +32,7 @@ inline_main = InlineKeyboardMarkup(inline_keyboard=[
 
 '''
 
-
+#кнопка назад
 back = InlineKeyboardMarkup(inline_keyboard = [
     [InlineKeyboardButton(text="назад", )],
 ])
