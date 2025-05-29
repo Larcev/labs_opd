@@ -35,19 +35,18 @@ async def handle_fast_flow(message: Message):
         await message.answer("Пожалуйста, начните с команды /start или выберите режим.")
         return
 
-    data = user_data[user_id]
-    stage = data["stage"]
+    data = user_data[user_id] # Из словаря user_data извлекаются данные, связанные с текущим пользователем (user_id).
+    stage = data["stage"] # Из словаря data извлекается текущее состояние этапа и этап за этапом следует через elif
 
     # Отладка: логируем этап
     print(f"User {user_id}, Stage: {stage}, Input: {message.text}")
     # тут для отслеживания пути пользователя, это для себя, отслеживать на каком этапе происходят ошибки
 
     # Обработка обычного погашения
-    if stage.startswith("normal"): # если начинается с normal, то можно идти дальше, в этом коде не нужно
-        #но если улучшать обычное погашение, добавлять ответвления, то нужно
+    if stage.startswith("normal"):  # если начинается с normal, то можно идти дальше
         if stage == "normal_amount": 
             if message.text.isdigit(): #если число
-                data["amount"] = int(message.text) 
+                data["amount"] = int(message.text) # превращает строку в целое число
                 data["stage"] = "normal_term" 
                 await message.answer("Введите срок кредита в месяцах:")
             else:
@@ -63,7 +62,7 @@ async def handle_fast_flow(message: Message):
 
         elif stage == "normal_percent":
             try:
-                percent = float(message.text.replace(",", "."))
+                percent = float(message.text.replace(",", ".")) # percent = 13.7 (float) преобразуем
                 data["percent"] = percent
 
                 # Расчет аннуитетного платежа
@@ -89,7 +88,7 @@ async def handle_fast_flow(message: Message):
                 await message.answer("Введите процент числом.")
 
     # Обработка 52 недели богатства
-    elif stage.startswith("wealth"):
+    elif stage.startswith("wealth"): # если кнопка богатства
         if stage == "wealth_amount":
             if message.text.isdigit():
                 data["amount"] = int(message.text)
@@ -218,33 +217,3 @@ async def handle_fast_flow(message: Message):
 
 
 
-'''@dp.message(CommandStart(deep_link=True))
-async def cmd_start(message: Message, command: CommandObject):
-    if command.args.isdigit():
-        if command.args == '242':
-            await message.answer(f'Привет! Ты пришел от Рустама')
-    else:
-        await message.answer('Ошибка')
-'''
-
-'''@dp.message(Command('help'))
-async def cmd_help(message: Message):
-    await message.answer('Пока что бот ничего не умеет')
-    '''
-
-
-'''
-@dp.message(F.photo)
-async def handle_photo(message: Message):
-    file_id = message.photo[-1].file_id
-    await message.answer_photo(file_id, caption='Вот твоё фото!')
-'''
-#отправить фото обратно в первоначальном качестве
-
-'''
-@dp.message(Command('id'))
-async def cmd_help(message: Message):
-    await message.answer(f'{message.from_user.first_name}, вам нужна помощь?')
-    await message.answer(f'Ваш ID: {message.from_user.id}')
-команда id, выдает id пользователя
-'''
